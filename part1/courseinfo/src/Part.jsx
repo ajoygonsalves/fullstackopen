@@ -1,9 +1,9 @@
 import React from "react";
 
-export default function Part({ part, exercise }) {
+export default function Part({ name, exercise }) {
   return (
     <p>
-      {part} {exercise}
+      {name} {exercise}
     </p>
   );
 }

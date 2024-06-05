@@ -1,5 +1,13 @@
 import React from "react";
 
-export default function Total({ exercises1, exercises2, exercises3 }) {
-  return <p>Number of exercises {exercises1 + exercises2 + exercises3}</p>;
+export default function Total({ parts }) {
+  let exerciseArray = parts.map((part) => part.exercises);
+
+  return (
+    <>
+      <p>
+        Number of exercises {exerciseArray.reduce((acc, curr) => acc + curr, 0)}
+      </p>
+    </>
+  );
 }
