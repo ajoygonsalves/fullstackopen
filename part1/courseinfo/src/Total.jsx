@@ -5,9 +5,10 @@ export default function Total({ parts }) {
 
   return (
     <>
-      <p>
-        Number of exercises {exerciseArray.reduce((acc, curr) => acc + curr, 0)}
-      </p>
+      <b>
+        Total number of exercises:{" "}
+        {exerciseArray.reduce((acc, curr) => acc + curr, 0)}
+      </b>
     </>
   );
 }
