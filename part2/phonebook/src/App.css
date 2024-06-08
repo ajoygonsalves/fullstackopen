@@ -6,3 +6,21 @@
 .person-item > * {
   margin-right: 1rem;
 }
+
+.success {
+  background-color: darkseagreen;
+  color: darkgreen;
+  border: 0.3rem solid darkgreen;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.error {
+  background-color: coral;
+  color: brown;
+  border: 0.3rem solid red;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}

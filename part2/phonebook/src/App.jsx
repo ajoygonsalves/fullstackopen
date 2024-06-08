@@ -11,6 +11,8 @@ const App = () => {
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [search, setSearch] = useState("");
+  const [successMessage, setSuccessMessage] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -32,12 +34,28 @@ const App = () => {
         id: personToEdit.id,
         name: newName,
         number: newNumber,
-      }).then((response) => {
-        const updatedPersons = persons.map((person) =>
-          person.id === response.id ? response : person
-        );
-        setPersons(updatedPersons);
-      });
+      })
+        .then((response) => {
+          const updatedPersons = persons.map((person) =>
+            person.id === response.id ? response : person
+          );
+          setPersons(updatedPersons);
+
+          setSuccessMessage(`Success, updated ${newName}'s contact`);
+
+          setTimeout(() => {
+            setSuccessMessage(null);
+          }, 3000);
+        })
+        .catch((error) => {
+          setErrorMessage(
+            `Information on ${newName} has already been removed from server`
+          );
+          console.log("Error: ", error);
+          setTimeout(() => {
+            setErrorMessage(null);
+          }, 3000);
+        });
     }
 
     PhoneBookServer.create({ name: newName, number: newNumber }).then(
@@ -89,6 +107,8 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      {successMessage && <div className="success">{successMessage}</div>}
+      {errorMessage && <div className="error">{errorMessage}</div>}
       <Filter search={search} handleChange={handleChange} />
 
       <h3>Add a new contact</h3>
