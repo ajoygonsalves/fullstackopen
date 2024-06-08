@@ -1,49 +1,19 @@
 {
   "persons": [
     {
-      "name": "Arto Hellas",
-      "number": "040-123456",
-      "id": "1"
-    },
-    {
-      "name": "Ada Lovelace",
-      "number": "39-44-5323523",
-      "id": "2"
-    },
-    {
-      "name": "Dan Abramov",
-      "number": "12-43-234345",
-      "id": "3"
-    },
-    {
-      "name": "Mary Poppendieck",
-      "number": "39-23-6423122",
-      "id": "4"
-    },
-    {
-      "id": "d136",
+      "id": "a13e",
       "name": "Ajoy Gonsalves",
-      "number": "28972891"
+      "number": "4532"
     },
     {
-      "id": "8819",
-      "name": "Mark Kenny",
-      "number": "2928292"
+      "id": "2031",
+      "name": "Melvin Arnold",
+      "number": "4212334"
     },
     {
-      "id": "67a8",
-      "name": "Ian Gonsalves",
-      "number": "1839018329"
-    },
-    {
-      "id": "702d",
-      "name": "Taz Mainian",
-      "number": "90108301"
-    },
-    {
-      "id": "304f",
-      "name": "Ivan Smith",
-      "number": "28302803183"
+      "id": "51c3",
+      "name": "Sample Workflow Demo",
+      "number": "91729281"
     }
   ]
 }

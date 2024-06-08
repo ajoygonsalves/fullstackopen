@@ -17,12 +17,31 @@ const App = () => {
     const textNotPresent =
       newName.length <= 0 || newNumber.length <= 0 || !newName || !newNumber;
     if (textNotPresent) return;
-    if (persons.some((person) => person.name === newName))
-      return alert(`${newName} already exists in the phonebook`);
+
+    const sameName = persons.some((person) => person.name === newName);
+
+    if (
+      sameName &&
+      window.confirm(
+        `${newName} is already in the phone book, replace the old number with the new one?`
+      )
+    ) {
+      const personToEdit = persons.find((person) => person.name === newName);
+
+      return PhoneBookServer.update(personToEdit.id, {
+        id: personToEdit.id,
+        name: newName,
+        number: newNumber,
+      }).then((response) => {
+        const updatedPersons = persons.map((person) =>
+          person.id === response.id ? response : person
+        );
+        setPersons(updatedPersons);
+      });
+    }
 
     PhoneBookServer.create({ name: newName, number: newNumber }).then(
       (response) => {
-        console.log(response);
         setPersons([...persons, { ...response }]);
       }
     );
@@ -42,21 +61,28 @@ const App = () => {
       case "search":
         setSearch(e.target.value);
         break;
+      case "delete":
+        if (
+          window.confirm(`Do you really want to delete ${e.target.name}? :(`)
+        ) {
+          PhoneBookServer.toDelete(e.target.value);
+          setPersons(persons.filter((person) => person.id !== e.target.value));
+        }
     }
   };
 
   const searchFilter =
-    persons.length > 0 &&
-    persons.filter(
-      (person) =>
-        person.name?.toLowerCase().includes(search, 0) ||
-        person.number?.includes(search, 0)
-    );
+    search.length > 0
+      ? persons.filter(
+          (person) =>
+            person.name?.toLowerCase().includes(search.toLowerCase(), 0) ||
+            person.number?.includes(search, 0)
+        )
+      : persons;
 
   useEffect(() => {
     PhoneBookServer.getAll().then((response) => {
-      console.log(response);
-      setPersons((prevPersons) => [...prevPersons, ...response]);
+      setPersons(response);
     });
   }, []);
 
@@ -73,7 +99,11 @@ const App = () => {
         handleSubmit={handleSubmit}
       />
       <h3>Contacts</h3>
-      <Persons searchFilter={searchFilter} />
+      <Persons
+        searchFilter={searchFilter}
+        handleChange={handleChange}
+        persons={persons}
+      />
     </div>
   );
 };

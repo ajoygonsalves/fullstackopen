@@ -23,8 +23,16 @@ const update = (id, newObject) => {
     .catch((error) => console.log("Error:", error));
 };
 
+const toDelete = (id) => {
+  const request = axios
+    .delete(`${baseUrl}/${id}`)
+    .catch((error) => console.log("Error:", error));
+  return request;
+};
+
 export default {
   getAll,
   create,
   update,
+  toDelete,
 };
