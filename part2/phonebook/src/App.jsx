@@ -3,10 +3,11 @@ import { useState } from "react";
 import Filter from "./Filter";
 import PersonForm from "./PersonForm";
 import Persons from "./Persons";
+import axios from "axios";
 
 const App = () => {
   const [persons, setPersons] = useState([
-    { name: "Arto Hellas", number: "0382773849" },
+    { name: "Melvin Hellas", number: "038277384923" },
   ]);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
@@ -44,6 +45,13 @@ const App = () => {
       person.name.toLowerCase().includes(search, 0) ||
       person.number.includes(search, 0)
   );
+
+  useEffect(() => {
+    axios.get("http://localhost:3001/persons").then((promise) => {
+      const items = promise.data.map((item) => item);
+      setPersons((prevPersons) => [...prevPersons, ...items]);
+    });
+  }, []);
 
   return (
     <div>
