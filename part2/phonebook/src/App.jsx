@@ -4,11 +4,10 @@ import Filter from "./Filter";
 import PersonForm from "./PersonForm";
 import Persons from "./Persons";
 import axios from "axios";
+import PhoneBookServer from "../src/services/phonebook";
 
 const App = () => {
-  const [persons, setPersons] = useState([
-    { name: "Melvin Hellas", number: "038277384923" },
-  ]);
+  const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [search, setSearch] = useState("");
@@ -21,7 +20,13 @@ const App = () => {
     if (persons.some((person) => person.name === newName))
       return alert(`${newName} already exists in the phonebook`);
 
-    setPersons([...persons, { name: newName, number: newNumber }]);
+    PhoneBookServer.create({ name: newName, number: newNumber }).then(
+      (response) => {
+        console.log(response);
+        setPersons([...persons, { ...response }]);
+      }
+    );
+
     setNewName("");
     setNewNumber("");
   };
@@ -40,16 +45,18 @@ const App = () => {
     }
   };
 
-  const searchFilter = persons.filter(
-    (person) =>
-      person.name.toLowerCase().includes(search, 0) ||
-      person.number.includes(search, 0)
-  );
+  const searchFilter =
+    persons.length > 0 &&
+    persons.filter(
+      (person) =>
+        person.name?.toLowerCase().includes(search, 0) ||
+        person.number?.includes(search, 0)
+    );
 
   useEffect(() => {
-    axios.get("http://localhost:3001/persons").then((promise) => {
-      const items = promise.data.map((item) => item);
-      setPersons((prevPersons) => [...prevPersons, ...items]);
+    PhoneBookServer.getAll().then((response) => {
+      console.log(response);
+      setPersons((prevPersons) => [...prevPersons, ...response]);
     });
   }, []);
 
