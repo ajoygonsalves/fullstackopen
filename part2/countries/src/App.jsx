@@ -6,6 +6,7 @@ function App() {
   const [countries, setCountries] = useState([]);
   const [search, setSearch] = useState("");
   const [singleCountry, setSingleCountry] = useState(null);
+  const [show, setShow] = useState(false);
 
   const searchFilter = useMemo(() => {
     return countries.filter((country) =>
@@ -15,6 +16,32 @@ function App() {
 
   const handleChange = (e) => {
     setSearch(e.target.value);
+  };
+
+  const handleShowDetails = (e) => {
+    axios
+      .get(
+        `https://studies.cs.helsinki.fi/restcountries/api/name/${e.target.name.toLowerCase()}`
+      )
+      .then((response) => {
+        const country = response.data;
+        console.log("Single Country: ", country);
+        let singleCountryData = {
+          name: country.name.common,
+          capital: country.capital,
+          area: country.area,
+          languages: country.languages,
+          flag: {
+            image: country.flags.svg,
+            alt: country.flags.alt,
+          },
+        };
+
+        console.log("Single Country: ", singleCountryData);
+
+        setSingleCountry(singleCountryData);
+      })
+      .catch((error) => console.log("Error: ", error));
   };
 
   useEffect(() => {
@@ -50,9 +77,6 @@ function App() {
             },
           };
 
-          console.log("Single Country: ", singleCountryData);
-          console.log("type of capital: ", singleCountryData.capital);
-
           setSingleCountry(singleCountryData);
         })
         .catch((error) => console.log("Error: ", error));
@@ -61,49 +85,61 @@ function App() {
     }
   }, [search, countries]);
 
+  let content;
+  switch (true) {
+    case searchFilter.length === 0:
+      content = <div>No results, specify another filter</div>;
+      break;
+    case search.length > 0 &&
+      searchFilter.length <= 10 &&
+      searchFilter.length > 1:
+      content = (
+        <ul>
+          {searchFilter.map((country) => (
+            <li key={country}>
+              {country}
+              <button
+                name={country}
+                type="button"
+                onClick={() => handleShowDetails(country)}
+              >
+                show
+              </button>
+            </li>
+          ))}
+        </ul>
+      );
+      break;
+    case searchFilter.length === 1:
+      content = singleCountry && (
+        <div>
+          <h2>NAME: {singleCountry.name}</h2>
+          <p>Capital: {singleCountry.capital}</p>
+          <p>Area: {singleCountry.area}</p>
+          <p>Languages:</p>
+          {singleCountry.languages && (
+            <ul>
+              {Object.values(singleCountry.languages).map((language) => (
+                <li key={language}>{language}</li>
+              ))}
+            </ul>
+          )}
+          <img src={singleCountry.flag.image} alt={singleCountry.flag.alt} />
+        </div>
+      );
+      break;
+    default:
+      content = <div>Too many results, specify another filter</div>;
+  }
+
   return (
     <>
       <label htmlFor="search">Find countries:</label>
       <input type="search" name="search" id="search" onChange={handleChange} />
-
-      {searchFilter.length === 0 && (
-        <div>No results, specify another filter</div>
-      )}
-      {search.length > 0 && searchFilter.length !== 0 ? (
-        searchFilter.length <= 10 && searchFilter.length > 1 ? (
-          <ul>
-            {searchFilter.map((country) => (
-              <li key={country}>{country}</li>
-            ))}
-          </ul>
-        ) : searchFilter.length === 1 ? (
-          <>
-            <div>
-              {singleCountry && (
-                <>
-                  <h2>NAME: {singleCountry.name}</h2>
-                  <p>Capital: {singleCountry.capital}</p>
-                  <p>Area: {singleCountry.area}</p>
-                  <p>Languages:</p>
-                  <ul>
-                    {Object.values(singleCountry.languages).map((country) => (
-                      <li key={country}>{country}</li>
-                    ))}
-                  </ul>
-                  <img
-                    src={singleCountry.flag.image}
-                    alt={singleCountry.flag.alt}
-                  />
-                </>
-              )}
-            </div>
-          </>
-        ) : (
-          <div>Too many results, specify another filter</div>
-        )
-      ) : (
+      {content}
+      {search.length === 0 && (
         <ul>
-          {countries.map((country, i) => (
+          {countries.map((country) => (
             <li key={country}>{country}</li>
           ))}
         </ul>
