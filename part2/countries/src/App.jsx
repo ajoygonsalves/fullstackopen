@@ -6,7 +6,7 @@ function App() {
   const [countries, setCountries] = useState([]);
   const [search, setSearch] = useState("");
   const [singleCountry, setSingleCountry] = useState(null);
-  const [show, setShow] = useState(false);
+  const [weatherData, setWeatherData] = useState(null);
 
   const searchFilter = useMemo(() => {
     return countries.filter((country) =>
@@ -81,6 +81,29 @@ function App() {
     }
   }, [search, countries]);
 
+  useEffect(() => {
+    if (searchFilter.length === 1) {
+      axios
+        .get(
+          `https://api.openweathermap.org/data/2.5/weather?q=${searchFilter}&APPID=${
+            import.meta.env.VITE_WEATHER_KEY
+          }`
+        )
+        .then((response) => {
+          console.log("Weather: ", response.data);
+
+          const weather = {
+            temp: (response.data.main.temp - 273.16).toFixed(1),
+            wind: response.data.wind.speed,
+            icon: `https://openweathermap.org/img/wn/${response.data.weather[0].icon}@4x.png`,
+          };
+
+          setWeatherData(weather);
+        })
+        .catch((error) => ("Error: ", error));
+    }
+  }, [searchFilter]);
+
   return (
     <>
       <label htmlFor="search">Find countries:</label>
@@ -98,6 +121,14 @@ function App() {
             ))}
           </ul>
           <img src={singleCountry.flag.image} alt={singleCountry.flag.alt} />
+          {weatherData && (
+            <>
+              <h2>Weather</h2>
+              <p>Temperature: {weatherData.temp} celcius</p>
+              <img src={weatherData.icon} alt={singleCountry.name} />
+              <p>Wind: {weatherData.wind} m/s</p>
+            </>
+          )}
         </>
       )}
 
