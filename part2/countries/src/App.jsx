@@ -1,16 +1,17 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import axios from "axios";
 import { useEffect } from "react";
 
 function App() {
   const [countries, setCountries] = useState([]);
   const [search, setSearch] = useState("");
-  const [error, setError] = useState(null);
   const [singleCountry, setSingleCountry] = useState(null);
 
-  const searchFilter = countries.filter((country) =>
-    country.toLowerCase().includes(search.toLowerCase())
-  );
+  const searchFilter = useMemo(() => {
+    return countries.filter((country) =>
+      country.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [search, countries]);
 
   const handleChange = (e) => {
     setSearch(e.target.value);
@@ -64,8 +65,11 @@ function App() {
     <>
       <label htmlFor="search">Find countries:</label>
       <input type="search" name="search" id="search" onChange={handleChange} />
-      <div>{search}</div>
-      {search.length > 0 ? (
+
+      {searchFilter.length === 0 && (
+        <div>No results, specify another filter</div>
+      )}
+      {search.length > 0 && searchFilter.length !== 0 ? (
         searchFilter.length <= 10 && searchFilter.length > 1 ? (
           <ul>
             {searchFilter.map((country) => (
