@@ -22,45 +22,56 @@ const App = () => {
 
     const sameName = persons.some((person) => person.name === newName);
 
-    if (
-      sameName &&
-      window.confirm(
-        `${newName} is already in the phone book, replace the old number with the new one?`
-      )
-    ) {
-      const personToEdit = persons.find((person) => person.name === newName);
+    if (sameName) {
+      if (
+        window.confirm(
+          `${newName} is already in the phone book, replace the old number with the new one?`
+        )
+      ) {
+        const personToEdit = persons.find((person) => person.name === newName);
 
-      return PhoneBookServer.update(personToEdit.id, {
-        id: personToEdit.id,
-        name: newName,
-        number: newNumber,
-      })
-        .then((response) => {
-          const updatedPersons = persons.map((person) =>
-            person.id === response.id ? response : person
-          );
-          setPersons(updatedPersons);
-
-          setSuccessMessage(`Success, updated ${newName}'s contact`);
-
-          setTimeout(() => {
-            setSuccessMessage(null);
-          }, 3000);
+        PhoneBookServer.update(personToEdit.id, {
+          id: personToEdit.id,
+          name: newName,
+          number: newNumber,
         })
-        .catch((error) => {
-          setErrorMessage(
-            `Information on ${newName} has already been removed from server`
-          );
-          console.log("Error: ", error);
-          setTimeout(() => {
-            setErrorMessage(null);
-          }, 3000);
-        });
+          .then((response) => {
+            const updatedPersons = persons.map((person) =>
+              person.id === response.id ? response : person
+            );
+            setPersons(updatedPersons);
+
+            setSuccessMessage(`Success, updated ${newName}'s contact`);
+            setTimeout(() => {
+              setSuccessMessage(null);
+            }, 3000);
+          })
+          .catch((error) => {
+            setErrorMessage(
+              `Information on ${newName} has already been removed from server`
+            );
+            console.log("Error: ", error);
+            setTimeout(() => {
+              setErrorMessage(null);
+            }, 3000);
+          });
+
+        return; // Exit the function after handling the update
+      } else {
+        return; // Exit the function if the user cancels the update
+      }
     }
 
+    // Add new person if name is not found in existing persons
     PhoneBookServer.create({ name: newName, number: newNumber })
       .then((response) => {
-        setPersons([...persons, { ...response }]);
+        setPersons(persons.concat(response));
+        setSuccessMessage(`Success, added ${newName}`);
+        setTimeout(() => {
+          setSuccessMessage(null);
+        }, 3000);
+        setNewName("");
+        setNewNumber("");
       })
       .catch((error) => {
         setErrorMessage(`Failed to add ${newName}`);
@@ -69,9 +80,6 @@ const App = () => {
           setErrorMessage(null);
         }, 3000);
       });
-
-    setNewName("");
-    setNewNumber("");
   };
 
   const handleChange = (e) => {
@@ -122,6 +130,10 @@ const App = () => {
     });
   }, []);
 
+  useEffect(() => {
+    console.log("Search Filter: ", searchFilter.at(-1));
+  }, [search]);
+
   return (
     <div>
       <h2>Phonebook</h2>
@@ -137,11 +149,7 @@ const App = () => {
         handleSubmit={handleSubmit}
       />
       <h3>Contacts</h3>
-      <Persons
-        searchFilter={searchFilter}
-        handleChange={handleChange}
-        persons={persons}
-      />
+      <Persons searchFilter={searchFilter} handleChange={handleChange} />
     </div>
   );
 };

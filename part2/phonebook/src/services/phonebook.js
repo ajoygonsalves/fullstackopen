@@ -1,6 +1,7 @@
 import axios from "axios";
 
-const baseUrl = "http://localhost:3001/api/persons";
+const baseUrl =
+  "https://fullstackopen-phonebook-backend-aj.fly.dev/api/persons";
 
 axios
   .get(baseUrl)

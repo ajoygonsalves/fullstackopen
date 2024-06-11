@@ -1,11 +1,11 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 export default function Persons({ searchFilter, handleChange }) {
   return (
     <>
       <ul>
-        {searchFilter.map((person) => (
-          <li key={person.id}>
+        {searchFilter.map((person, index) => (
+          <li key={`${person.id}-${index}`}>
             <div className="person-item">
               <p>
                 {person.name} - {person.number} - id: {person.id}
