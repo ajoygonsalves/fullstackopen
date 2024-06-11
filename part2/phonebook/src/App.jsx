@@ -21,8 +21,6 @@ const App = () => {
     if (textNotPresent) return;
 
     const sameName = persons.some((person) => person.name === newName);
-    const personToEdit = persons.find((person) => person.name === newName);
-    console.log("PERSON TO EDIT: ", personToEdit);
 
     if (sameName) {
       if (
@@ -30,6 +28,8 @@ const App = () => {
           `${newName} is already in the phone book, replace the old number with the new one?`
         )
       ) {
+        const personToEdit = persons.find((person) => person.name === newName);
+
         PhoneBookServer.update({
           id: personToEdit.id,
           name: newName,
@@ -65,7 +65,8 @@ const App = () => {
     // Add new person if name is not found in existing persons
     PhoneBookServer.create({ name: newName, number: newNumber })
       .then((response) => {
-        setPersons(persons.concat(response));
+        console.log("Response: ", response);
+        setPersons(persons.concat(response.person));
         setSuccessMessage(`Success, added ${newName}`);
         setTimeout(() => {
           setSuccessMessage(null);
