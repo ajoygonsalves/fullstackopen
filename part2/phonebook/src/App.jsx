@@ -58,11 +58,17 @@ const App = () => {
         });
     }
 
-    PhoneBookServer.create({ name: newName, number: newNumber }).then(
-      (response) => {
+    PhoneBookServer.create({ name: newName, number: newNumber })
+      .then((response) => {
         setPersons([...persons, { ...response }]);
-      }
-    );
+      })
+      .catch((error) => {
+        setErrorMessage(`Failed to add ${newName}`);
+        console.log("Error: ", error);
+        setTimeout(() => {
+          setErrorMessage(null);
+        }, 3000);
+      });
 
     setNewName("");
     setNewNumber("");
@@ -83,9 +89,21 @@ const App = () => {
         if (
           window.confirm(`Do you really want to delete ${e.target.name}? :(`)
         ) {
-          PhoneBookServer.toDelete(e.target.value);
-          setPersons(persons.filter((person) => person.id !== e.target.value));
+          PhoneBookServer.toDelete(e.target.value)
+            .then(() => {
+              setPersons(
+                persons.filter((person) => person.id !== Number(e.target.value))
+              );
+            })
+            .catch((error) => {
+              setErrorMessage(`Failed to delete ${e.target.name}`);
+              setTimeout(() => {
+                setErrorMessage(null);
+              }, 3000);
+              console.error("Error deleting contact:", error);
+            });
         }
+        break;
     }
   };
 

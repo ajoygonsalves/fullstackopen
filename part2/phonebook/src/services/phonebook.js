@@ -1,6 +1,11 @@
 import axios from "axios";
 
-const baseUrl = "http://localhost:3001/persons";
+const baseUrl = "http://localhost:3001/api/persons";
+
+axios
+  .get(baseUrl)
+  .then((response) => response.data)
+  .catch((error) => console.log("Error:", error));
 
 const getAll = () => {
   const request = axios.get(baseUrl);
@@ -26,6 +31,7 @@ const update = (id, newObject) => {
 const toDelete = (id) => {
   const request = axios
     .delete(`${baseUrl}/${id}`)
+    .then((response) => response.data)
     .catch((error) => console.log("Error:", error));
   return request;
 };
