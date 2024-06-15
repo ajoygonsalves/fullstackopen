@@ -1,7 +1,6 @@
 import axios from "axios";
 
-const baseUrl =
-  "https://fullstackopen-phonebook-backend-aj.fly.dev/api/persons";
+const baseUrl = "http://localhost:3001/api/persons";
 
 axios
   .get(baseUrl)
@@ -22,11 +21,14 @@ const create = (newObject) => {
     .catch((error) => console.log("Error:", error));
 };
 
-const update = (newObject) => {
-  const request = axios.post(baseUrl, newObject);
+const update = (id, newObject) => {
+  const request = axios.put(`${baseUrl}/${id}`, newObject);
   return request
     .then((response) => response.data)
-    .catch((error) => console.log("Error:", error));
+    .catch((error) => {
+      console.log("Error:", error);
+      throw error; // Re-throw to handle it in the calling function
+    });
 };
 
 const toDelete = (id) => {

@@ -3,19 +3,28 @@ import React from "react";
 export default function PersonForm({
   handleSubmit,
   handleChange,
-  newName,
+  newFirstName,
+  newLastName,
   newNumber,
 }) {
   return (
     <>
       <form onSubmit={handleSubmit}>
         <div>
-          full name:{" "}
+          First name:{" "}
           <input
             type="text"
-            id="name"
-            name="name"
-            value={newName}
+            id="firstName"
+            name="firstName"
+            value={newFirstName}
+            onChange={handleChange}
+          />
+          Last name:{" "}
+          <input
+            type="text"
+            id="lastName"
+            name="lastName"
+            value={newLastName}
             onChange={handleChange}
           />
         </div>

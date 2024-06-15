@@ -1,14 +1,13 @@
-import { useEffect } from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Filter from "./Filter";
 import PersonForm from "./PersonForm";
 import Persons from "./Persons";
-import axios from "axios";
 import PhoneBookServer from "../src/services/phonebook";
 
 const App = () => {
   const [persons, setPersons] = useState([]);
-  const [newName, setNewName] = useState("");
+  const [newLastName, setNewLastName] = useState("");
+  const [newFirstName, setNewFirstName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [search, setSearch] = useState("");
   const [successMessage, setSuccessMessage] = useState(null);
@@ -17,38 +16,49 @@ const App = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     const textNotPresent =
-      newName.length <= 0 || newNumber.length <= 0 || !newName || !newNumber;
+      newFirstName.length <= 0 ||
+      newLastName.length <= 0 ||
+      newNumber.length <= 0;
+
     if (textNotPresent) return;
 
-    const sameName = persons.some((person) => person.name === newName);
+    const sameName = persons.some(
+      (person) =>
+        person.firstName === newFirstName && person.lastName === newLastName
+    );
 
     if (sameName) {
       if (
         window.confirm(
-          `${newName} is already in the phone book, replace the old number with the new one?`
+          `${newFirstName} ${newLastName} is already in the phone book, replace the old number with the new one?`
         )
       ) {
-        const personToEdit = persons.find((person) => person.name === newName);
+        const personToEdit = persons.find(
+          (person) =>
+            person.firstName === newFirstName && person.lastName === newLastName
+        );
 
-        PhoneBookServer.update({
-          id: personToEdit.id,
-          name: newName,
-          number: newNumber,
+        PhoneBookServer.update(personToEdit.id, {
+          firstName: newFirstName,
+          lastName: newLastName,
+          phoneNumber: newNumber,
         })
           .then((response) => {
             const updatedPersons = persons.map((person) =>
-              person.id === response.id ? response : person
+              person.id === response.person.id ? response.person : person
             );
             setPersons(updatedPersons);
 
-            setSuccessMessage(`Success, updated ${newName}'s contact`);
+            setSuccessMessage(
+              `Success, updated ${newFirstName} ${newLastName}'s contact`
+            );
             setTimeout(() => {
               setSuccessMessage(null);
             }, 3000);
           })
           .catch((error) => {
             setErrorMessage(
-              `Information on ${newName} has already been removed from server`
+              `Information on ${newFirstName} ${newLastName} has already been removed from server`
             );
             console.log("Error: ", error);
             setTimeout(() => {
@@ -63,19 +73,24 @@ const App = () => {
     }
 
     // Add new person if name is not found in existing persons
-    PhoneBookServer.create({ name: newName, number: newNumber })
+    PhoneBookServer.create({
+      firstName: newFirstName,
+      lastName: newLastName,
+      phoneNumber: newNumber,
+    })
       .then((response) => {
-        console.log("Response: ", response);
+        // console.log(response);
         setPersons(persons.concat(response.person));
-        setSuccessMessage(`Success, added ${newName}`);
+        setSuccessMessage(`Success, added ${newFirstName} ${newLastName}`);
         setTimeout(() => {
           setSuccessMessage(null);
         }, 3000);
-        setNewName("");
+        setNewFirstName("");
+        setNewLastName("");
         setNewNumber("");
       })
       .catch((error) => {
-        setErrorMessage(`Failed to add ${newName}`);
+        setErrorMessage(`Failed to add ${newFirstName} ${newLastName}`);
         console.log("Error: ", error);
         setTimeout(() => {
           setErrorMessage(null);
@@ -85,8 +100,11 @@ const App = () => {
 
   const handleChange = (e) => {
     switch (e.target.id) {
-      case "name":
-        setNewName(e.target.value);
+      case "firstName":
+        setNewFirstName(e.target.value);
+        break;
+      case "lastName":
+        setNewLastName(e.target.value);
         break;
       case "number":
         setNewNumber(e.target.value);
@@ -101,7 +119,7 @@ const App = () => {
           PhoneBookServer.toDelete(e.target.value)
             .then(() => {
               setPersons(
-                persons.filter((person) => person.id !== Number(e.target.value))
+                persons.filter((person) => person.id !== e.target.value)
               );
             })
             .catch((error) => {
@@ -120,8 +138,9 @@ const App = () => {
     search.length > 0
       ? persons.filter(
           (person) =>
-            person.name?.toLowerCase().includes(search.toLowerCase(), 0) ||
-            person.number?.includes(search, 0)
+            person.firstName?.toLowerCase().includes(search.toLowerCase(), 0) ||
+            person.lastName?.toLowerCase().includes(search.toLowerCase(), 0) ||
+            person.phoneNumber?.includes(search, 0)
         )
       : persons;
 
@@ -130,10 +149,6 @@ const App = () => {
       setPersons(response);
     });
   }, []);
-
-  useEffect(() => {
-    console.log("Search Filter: ", searchFilter.at(-1));
-  }, [search]);
 
   return (
     <div>
@@ -144,8 +159,9 @@ const App = () => {
 
       <h3>Add a new contact</h3>
       <PersonForm
-        newName={newName}
         newNumber={newNumber}
+        newFirstName={newFirstName} // Corrected typo here
+        newLastName={newLastName}
         handleChange={handleChange}
         handleSubmit={handleSubmit}
       />
