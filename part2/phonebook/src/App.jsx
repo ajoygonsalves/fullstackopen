@@ -13,7 +13,7 @@ const App = () => {
   const [successMessage, setSuccessMessage] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const textNotPresent =
       newFirstName.length <= 0 ||
@@ -38,33 +38,33 @@ const App = () => {
             person.firstName === newFirstName && person.lastName === newLastName
         );
 
-        PhoneBookServer.update(personToEdit.id, {
-          firstName: newFirstName,
-          lastName: newLastName,
-          phoneNumber: newNumber,
-        })
-          .then((response) => {
-            const updatedPersons = persons.map((person) =>
-              person.id === response.person.id ? response.person : person
-            );
-            setPersons(updatedPersons);
-
-            setSuccessMessage(
-              `Success, updated ${newFirstName} ${newLastName}'s contact`
-            );
-            setTimeout(() => {
-              setSuccessMessage(null);
-            }, 3000);
-          })
-          .catch((error) => {
-            setErrorMessage(
-              `Information on ${newFirstName} ${newLastName} has already been removed from server`
-            );
-            console.log("Error: ", error);
-            setTimeout(() => {
-              setErrorMessage(null);
-            }, 3000);
+        try {
+          const response = await PhoneBookServer.update(personToEdit.id, {
+            firstName: newFirstName,
+            lastName: newLastName,
+            phoneNumber: newNumber,
           });
+
+          const updatedPersons = persons.map((person) =>
+            person.id === response.person.id ? response.person : person
+          );
+          setPersons(updatedPersons);
+
+          setSuccessMessage(
+            `Success, updated ${newFirstName} ${newLastName}'s contact`
+          );
+          setTimeout(() => {
+            setSuccessMessage(null);
+          }, 3000);
+        } catch (error) {
+          setErrorMessage(
+            `Information on ${newFirstName} ${newLastName} has already been removed from server`
+          );
+          console.log("Error: ", error);
+          setTimeout(() => {
+            setErrorMessage(null);
+          }, 3000);
+        }
 
         return; // Exit the function after handling the update
       } else {
@@ -73,32 +73,31 @@ const App = () => {
     }
 
     // Add new person if name is not found in existing persons
-    PhoneBookServer.create({
-      firstName: newFirstName,
-      lastName: newLastName,
-      phoneNumber: newNumber,
-    })
-      .then((response) => {
-        // console.log(response);
-        setPersons(persons.concat(response.person));
-        setSuccessMessage(`Success, added ${newFirstName} ${newLastName}`);
-        setTimeout(() => {
-          setSuccessMessage(null);
-        }, 3000);
-        setNewFirstName("");
-        setNewLastName("");
-        setNewNumber("");
-      })
-      .catch((error) => {
-        setErrorMessage(`Failed to add ${newFirstName} ${newLastName}`);
-        console.log("Error: ", error);
-        setTimeout(() => {
-          setErrorMessage(null);
-        }, 3000);
+    try {
+      const response = await PhoneBookServer.create({
+        firstName: newFirstName,
+        lastName: newLastName,
+        phoneNumber: newNumber,
       });
+
+      setPersons(persons.concat(response.person));
+      setSuccessMessage(`Success, added ${newFirstName} ${newLastName}`);
+      setTimeout(() => {
+        setSuccessMessage(null);
+      }, 3000);
+      setNewFirstName("");
+      setNewLastName("");
+      setNewNumber("");
+    } catch (error) {
+      setErrorMessage(error.response.data.error);
+      console.log("Error: ", error);
+      setTimeout(() => {
+        setErrorMessage(null);
+      }, 3000);
+    }
   };
 
-  const handleChange = (e) => {
+  const handleChange = async (e) => {
     switch (e.target.id) {
       case "firstName":
         setNewFirstName(e.target.value);
@@ -116,19 +115,18 @@ const App = () => {
         if (
           window.confirm(`Do you really want to delete ${e.target.name}? :(`)
         ) {
-          PhoneBookServer.toDelete(e.target.value)
-            .then(() => {
-              setPersons(
-                persons.filter((person) => person.id !== e.target.value)
-              );
-            })
-            .catch((error) => {
-              setErrorMessage(`Failed to delete ${e.target.name}`);
-              setTimeout(() => {
-                setErrorMessage(null);
-              }, 3000);
-              console.error("Error deleting contact:", error);
-            });
+          try {
+            await PhoneBookServer.toDelete(e.target.value);
+            setPersons(
+              persons.filter((person) => person.id !== e.target.value)
+            );
+          } catch (error) {
+            setErrorMessage(`Failed to delete ${e.target.name}`);
+            setTimeout(() => {
+              setErrorMessage(null);
+            }, 3000);
+            console.error("Error deleting contact:", error);
+          }
         }
         break;
     }
@@ -145,9 +143,12 @@ const App = () => {
       : persons;
 
   useEffect(() => {
-    PhoneBookServer.getAll().then((response) => {
+    const fetchData = async () => {
+      const response = await PhoneBookServer.getAll();
       setPersons(response);
-    });
+    };
+
+    fetchData();
   }, []);
 
   return (

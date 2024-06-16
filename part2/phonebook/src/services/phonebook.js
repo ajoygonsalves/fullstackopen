@@ -1,43 +1,62 @@
 import axios from "axios";
 
-const baseUrl =
-  "https://fullstackopen-phonebook-backend-aj.fly.dev/api/persons";
+const baseUrl = "http://localhost:3001/api/persons";
 
-axios
-  .get(baseUrl)
-  .then((response) => response.data)
-  .catch((error) => console.log("Error:", error));
-
-const getAll = () => {
-  const request = axios.get(baseUrl);
-  return request
-    .then((response) => response.data)
-    .catch((error) => console.log("Error:", error));
+const create = async (newObject) => {
+  try {
+    const response = await axios.post(baseUrl, newObject);
+    console.log({ response });
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.data && error.response.data.error) {
+      console.log("Validation Error:", error.response.data.error);
+    } else {
+      console.log("Unexpected Error:", error.message);
+    }
+    throw error;
+  }
 };
 
-const create = (newObject) => {
-  const request = axios.post(baseUrl, newObject);
-  return request
-    .then((response) => response.data)
-    .catch((error) => console.log("Error:", error));
+const update = async (id, newObject) => {
+  try {
+    const response = await axios.put(`${baseUrl}/${id}`, newObject);
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.data && error.response.data.error) {
+      console.log("Validation Error:", error.response.data.error);
+    } else {
+      console.log("Unexpected Error:", error.message);
+    }
+    throw error;
+  }
 };
 
-const update = (id, newObject) => {
-  const request = axios.put(`${baseUrl}/${id}`, newObject);
-  return request
-    .then((response) => response.data)
-    .catch((error) => {
-      console.log("Error:", error);
-      throw error; // Re-throw to handle it in the calling function
-    });
+const toDelete = async (id) => {
+  try {
+    const response = await axios.delete(`${baseUrl}/${id}`);
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.data && error.response.data.error) {
+      console.log("Validation Error:", error.response.data.error);
+    } else {
+      console.log("Unexpected Error:", error.message);
+    }
+    throw error;
+  }
 };
 
-const toDelete = (id) => {
-  const request = axios
-    .delete(`${baseUrl}/${id}`)
-    .then((response) => response.data)
-    .catch((error) => console.log("Error:", error));
-  return request;
+const getAll = async () => {
+  try {
+    const response = await axios.get(baseUrl);
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.data && error.response.data.error) {
+      console.log("Validation Error:", error.response.data.error);
+    } else {
+      console.log("Unexpected Error:", error.message);
+    }
+    throw error;
+  }
 };
 
 export default {
